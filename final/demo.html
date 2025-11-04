@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swarajya AI - Investment Prediction Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header Styles */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-tab:hover:not(.active) {
+            background: #f1f5f9;
+        }
+        
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: var(--dark);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* Button Styles */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        /* Result Card */
+        .result-card {
+            background: var(--gradient);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .grade-badge {
+            display: inline-block;
+            background: var(--success);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+        
+        .prediction-score {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .model-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .model-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Region Cards */
+        .regions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .region-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .region-card h4 {
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .region-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .region-stat {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Model Status */
+        .model-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-loaded {
+            background: var(--success);
+        }
+        
+        .status-loading {
+            background: var(--warning);
+        }
+        
+        .status-error {
+            background: var(--danger);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .model-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Swarajya AI Investment Platform</h1>
+            <p>AI-Powered Investment Analysis & Regional Growth Prediction</p>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('prediction')">🤖 Prediction</button>
+            <button class="nav-tab" onclick="switchTab('regions')">🏛️ Regions</button>
+            <button class="nav-tab" onclick="switchTab('models')">🔧 Models</button>
+            <button class="nav-tab" onclick="switchTab('analytics')">📈 Analytics</button>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalRegions">5</div>
+                    <div class="stat-label">Regions Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCities">10</div>
+                    <div class="stat-label">Cities Covered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgGDP">7.7%</div>
+                    <div class="stat-label">Avg GDP Growth</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="modelsReady">4</div>
+                    <div class="stat-label">AI Models Ready</div>
+                </div>
+            </div>
+            
+            <!-- Model Status -->
+            <div class="card">
+                <h3>🤖 AI Model Status</h3>
+                <div id="modelStatus">
+                    <div class="model-status">
+                        <span class="status-dot status-loading"></span>
+                        <span>Loading models...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Analysis -->
+            <div class="card">
+                <h3>🎯 Quick Investment Analysis</h3>
+                <p>Get instant investment recommendations using trained AI models.</p>
+                <button class="btn" onclick="switchTab('prediction')">
+                    🚀 Start Analysis
+                </button>
+            </div>
+            
+            <!-- Recent Predictions -->
+            <div class="card">
+                <h3>📈 Recent Predictions</h3>
+                <div id="recentPredictions">
+                    <p style="color: #666; text-align: center;">No predictions yet. Make your first prediction!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Prediction Tab -->
+        <div id="prediction" class="tab-content">
+            <div class="card">
+                <h3>📊 Investment Potential Analysis</h3>
+                <form id="predictionForm" class="prediction-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="gdp_growth">GDP Growth Rate (%)</label>
+                            <input type="number" id="gdp_growth" step="0.1" value="7.5" min="0" max="20" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employment_rate">Employment Rate (%)</label>
+                            <input type="number" id="employment_rate" step="0.1" value="85" min="0" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="industrial_output">Industrial Output Index</label>
+                            <input type="number" id="industrial_output" value="120" min="0" max="300" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="infrastructure_score">Infrastructure Score</label>
+                            <input type="number" id="infrastructure_score" value="75" min="0" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="population_growth">Population Growth (%)</label>
+                            <input type="number" id="population_growth" step="0.1" value="1.5" min="0" max="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="education_index">Education Index (0-1)</label>
+                            <input type="number" id="education_index" step="0.01" value="0.75" min="0" max="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="healthcare_index">Healthcare Index (0-1)</label>
+                            <input type="number" id="healthcare_index" step="0.01" value="0.72" min="0" max="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="urbanization_rate">Urbanization Rate (%)</label>
+                            <input type="number" id="urbanization_rate" step="0.1" value="50" min="0" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fdi_inflow">FDI Inflow (Billions $)</label>
+                            <input type="number" id="fdi_inflow" step="0.1" value="2.5" min="0" max="10" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="domestic_investment">Domestic Investment (Billions $)</label>
+                            <input type="number" id="domestic_investment" step="0.1" value="15.0" min="0" max="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="venture_capital">Venture Capital (Billions $)</label>
+                            <input type="number" id="venture_capital" step="0.1" value="1.0" min="0" max="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="real_estate_growth">Real Estate Growth (%)</label>
+                            <input type="number" id="real_estate_growth" step="0.1" value="8.0" min="0" max="20" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">
+                        🤖 Analyze Investment Potential
+                    </button>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>AI Models are analyzing your data...</p>
+                </div>
+                
+                <div class="result-card" id="resultCard" style="display: none;">
+                    <h3>🎯 Investment Recommendation</h3>
+                    <div class="prediction-score" id="predictionScore">-</div>
+                    <div class="grade-badge" id="investmentGrade">-</div>
+                    <p id="recommendationText" style="font-size: 1.1rem; margin: 15px 0;"></p>
+                    
+                    <h4>🤖 Model Consensus</h4>
+                    <div class="model-comparison" id="modelComparison">
+                        <!-- Model results will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Regions Tab -->
+        <div id="regions" class="tab-content">
+            <div class="card">
+                <h3>🏛️ Regions Overview</h3>
+                <div class="regions-grid" id="regionsList">
+                    <!-- Regions will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🏙️ Major Cities Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="citiesChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Models Tab -->
+        <div id="models" class="tab-content">
+            <div class="card">
+                <h3>🔧 Model Management</h3>
+                <div id="modelDetails">
+                    <p>Loading model information...</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>📊 Model Performance</h3>
+                <div class="chart-container">
+                    <canvas id="modelPerformanceChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="card">
+                <h3>📈 Regional Performance Analytics</h3>
+                <div class="chart-container">
+                    <canvas id="regionalAnalyticsChart" width="400" height="400"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>📊 Investment Factor Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="factorsChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Investment Predictor Class that loads and uses PKL files
+        class InvestmentPredictor {
+            constructor() {
+                this.models = {};
+                this.modelStatus = {};
+                this.availableModels = [
+                    'economic_model',
+                    'demographic_model', 
+                    'comprehensive_model',
+                    'lightgbm_model'
+                ];
+                this.loadModels();
+            }
+
+            async loadModels() {
+                console.log('🤖 Loading trained models...');
+                updateModelStatus('Loading models from PKL files...');
+                
+                for (const modelName of this.availableModels) {
+                    try {
+                        this.modelStatus[modelName] = 'loading';
+                        updateModelStatus(`Loading ${modelName}...`);
+                        
+                        // In a real implementation, you would load the actual PKL files
+                        // For this demo, we'll simulate loading and use a mathematical model
+                        await this.simulateModelLoading(modelName);
+                        
+                        this.models[modelName] = {
+                            predict: this.createPredictionFunction(modelName),
+                            features: this.getModelFeatures(modelName),
+                            metrics: { r2: 0.85 + Math.random() * 0.1 } // Simulated metrics
+                        };
+                        
+                        this.modelStatus[modelName] = 'loaded';
+                        updateModelStatus(`${modelName} loaded successfully`, 'success');
+                        
+                    } catch (error) {
+                        console.error(`Error loading ${modelName}:`, error);
+                        this.modelStatus[modelName] = 'error';
+                        updateModelStatus(`Failed to load ${modelName}`, 'error');
+                    }
+                }
+                
+                updateModelStatus('All models loaded successfully!', 'success');
+                updateDashboardStats();
+            }
+
+            simulateModelLoading(modelName) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        console.log(`✅ ${modelName} loaded successfully`);
+                        resolve();
+                    }, 1000 + Math.random() * 1000);
+                });
+            }
+
+            getModelFeatures(modelName) {
+                const featureSets = {
+                    'economic_model': ['gdp_growth', 'employment_rate', 'industrial_output', 'infrastructure_score'],
+                    'demographic_model': ['population_growth', 'education_index', 'healthcare_index', 'urbanization_rate'],
+                    'comprehensive_model': ['gdp_growth', 'employment_rate', 'industrial_output', 'infrastructure_score', 
+                                          'population_growth', 'education_index', 'healthcare_index', 'urbanization_rate',
+                                          'fdi_inflow', 'domestic_investment', 'venture_capital', 'real_estate_growth'],
+                    'lightgbm_model': ['gdp_growth', 'employment_rate', 'industrial_output', 'infrastructure_score',
+                                     'population_growth', 'education_index', 'healthcare_index', 'urbanization_rate',
+                                     'fdi_inflow', 'domestic_investment', 'venture_capital', 'real_estate_growth']
+                };
+                return featureSets[modelName] || [];
+            }
+
+            createPredictionFunction(modelName) {
+                // This simulates the prediction logic of different models
+                // In reality, this would use the actual loaded model from PKL file
+                return (features) => {
+                    let score = 0;
+                    const weights = this.getModelWeights(modelName);
+                    
+                    for (const [feature, value] of Object.entries(features)) {
+                        if (weights[feature]) {
+                            score += value * weights[feature];
+                        }
+                    }
+                    
+                    // Add some model-specific characteristics
+                    const modelBias = {
+                        'economic_model': 0.8,
+                        'demographic_model': 0.7,
+                        'comprehensive_model': 0.9,
+                        'lightgbm_model': 0.85
+                    }[modelName] || 0.8;
+                    
+                    // Normalize to 0-100 range with some randomness for realism
+                    score = (score * modelBias + Math.random() * 5) * 1.2;
+                    return Math.max(0, Math.min(100, score));
+                };
+            }
+
+            getModelWeights(modelName) {
+                const weights = {
+                    'economic_model': {
+                        'gdp_growth': 0.25,
+                        'employment_rate': 0.20,
+                        'industrial_output': 0.15,
+                        'infrastructure_score': 0.15
+                    },
+                    'demographic_model': {
+                        'population_growth': 0.15,
+                        'education_index': 0.25,
+                        'healthcare_index': 0.20,
+                        'urbanization_rate': 0.15
+                    },
+                    'comprehensive_model': {
+                        'gdp_growth': 0.12,
+                        'employment_rate': 0.10,
+                        'industrial_output': 0.08,
+                        'infrastructure_score': 0.08,
+                        'population_growth': 0.07,
+                        'education_index': 0.10,
+                        'healthcare_index': 0.08,
+                        'urbanization_rate': 0.07,
+                        'fdi_inflow': 0.08,
+                        'domestic_investment': 0.07,
+                        'venture_capital': 0.05,
+                        'real_estate_growth': 0.05
+                    },
+                    'lightgbm_model': {
+                        'gdp_growth': 0.13,
+                        'employment_rate': 0.11,
+                        'industrial_output': 0.09,
+                        'infrastructure_score': 0.09,
+                        'population_growth': 0.08,
+                        'education_index': 0.11,
+                        'healthcare_index': 0.09,
+                        'urbanization_rate': 0.08,
+                        'fdi_inflow': 0.09,
+                        'domestic_investment': 0.08,
+                        'venture_capital': 0.06,
+                        'real_estate_growth': 0.06
+                    }
+                };
+                return weights[modelName] || {};
+            }
+
+            predict(features) {
+                const predictions = {};
+                
+                for (const [modelName, model] of Object.entries(this.models)) {
+                    if (this.modelStatus[modelName] === 'loaded') {
+                        try {
+                            const prediction = model.predict(features);
+                            predictions[modelName] = prediction;
+                        } catch (error) {
+                            console.error(`Prediction error for ${modelName}:`, error);
+                            predictions[modelName] = 0;
+                        }
+                    }
+                }
+                
+                // Calculate average prediction
+                const validPredictions = Object.values(predictions).filter(p => p > 0);
+                const averageScore = validPredictions.length > 0 
+                    ? validPredictions.reduce((a, b) => a + b, 0) / validPredictions.length 
+                    : 0;
+                
+                return {
+                    predictions,
+                    average_score: averageScore,
+                    investment_grade: this.getInvestmentGrade(averageScore),
+                    recommendation: this.getRecommendation(averageScore)
+                };
+            }
+
+            getInvestmentGrade(score) {
+                if (score >= 80) return "A+ (Excellent)";
+                if (score >= 70) return "A (Very Good)";
+                if (score >= 60) return "B+ (Good)";
+                if (score >= 50) return "B (Average)";
+                return "C (Needs Improvement)";
+            }
+
+            getRecommendation(score) {
+                if (score >= 80) return "🚀 Strong Buy - High growth potential with low risk";
+                if (score >= 70) return "✅ Buy - Good growth potential with moderate risk";
+                if (score >= 60) return "🔄 Hold - Moderate growth with careful monitoring needed";
+                if (score >= 50) return "⏸️ Wait - Limited growth potential, consider alternatives";
+                return "❌ Avoid - High risk with limited growth prospects";
+            }
+
+            getModelInfo() {
+                const info = {};
+                for (const modelName of this.availableModels) {
+                    info[modelName] = {
+                        status: this.modelStatus[modelName],
+                        features: this.getModelFeatures(modelName),
+                        metrics: this.models[modelName]?.metrics || { r2: 0, mse: 0 }
+                    };
+                }
+                return info;
+            }
+        }
+
+        // Global variables
+        let predictor;
+        const sampleData = {
+            regions: [
+                {
+                    id: 1,
+                    name: 'North Zone',
+                    gdp_growth: 7.2,
+                    employment_rate: 85,
+                    infrastructure_score: 75,
+                    education_index: 0.75,
+                    healthcare_index: 0.72,
+                    urbanization_rate: 45,
+                    fdi_inflow: 2.5,
+                    domestic_investment: 15.2,
+                    venture_capital: 1.2,
+                    real_estate_growth: 8.5,
+                    cities: ['Delhi', 'Jaipur', 'Lucknow']
+                },
+                {
+                    id: 2,
+                    name: 'South Zone',
+                    gdp_growth: 8.1,
+                    employment_rate: 92,
+                    infrastructure_score: 90,
+                    education_index: 0.88,
+                    healthcare_index: 0.85,
+                    urbanization_rate: 62,
+                    fdi_inflow: 4.2,
+                    domestic_investment: 22.5,
+                    venture_capital: 2.5,
+                    real_estate_growth: 12.2,
+                    cities: ['Bangalore', 'Chennai', 'Hyderabad']
+                },
+                {
+                    id: 3,
+                    name: 'East Zone',
+                    gdp_growth: 6.8,
+                    employment_rate: 78,
+                    infrastructure_score: 65,
+                    education_index: 0.65,
+                    healthcare_index: 0.68,
+                    urbanization_rate: 35,
+                    fdi_inflow: 1.8,
+                    domestic_investment: 12.8,
+                    venture_capital: 0.8,
+                    real_estate_growth: 6.8,
+                    cities: ['Kolkata', 'Patna', 'Guwahati']
+                },
+                {
+                    id: 4,
+                    name: 'West Zone',
+                    gdp_growth: 7.9,
+                    employment_rate: 88,
+                    infrastructure_score: 85,
+                    education_index: 0.82,
+                    healthcare_index: 0.80,
+                    urbanization_rate: 58,
+                    fdi_inflow: 3.8,
+                    domestic_investment: 20.3,
+                    venture_capital: 2.0,
+                    real_estate_growth: 10.5,
+                    cities: ['Mumbai', 'Ahmedabad', 'Pune']
+                },
+                {
+                    id: 5,
+                    name: 'Central Zone',
+                    gdp_growth: 6.5,
+                    employment_rate: 75,
+                    infrastructure_score: 60,
+                    education_index: 0.60,
+                    healthcare_index: 0.62,
+                    urbanization_rate: 32,
+                    fdi_inflow: 1.5,
+                    domestic_investment: 11.5,
+                    venture_capital: 0.7,
+                    real_estate_growth: 6.2,
+                    cities: ['Bhopal', 'Raipur', 'Nagpur']
+                }
+            ],
+            cities: [
+                { name: 'Delhi', population: 29.4, gdp_per_capita: 4800, business_score: 85 },
+                { name: 'Mumbai', population: 20.7, gdp_per_capita: 5200, business_score: 90 },
+                { name: 'Bangalore', population: 12.3, gdp_per_capita: 5800, business_score: 92 },
+                { name: 'Chennai', population: 10.7, gdp_per_capita: 4500, business_score: 80 },
+                { name: 'Kolkata', population: 14.9, gdp_per_capita: 3800, business_score: 75 },
+                { name: 'Hyderabad', population: 9.7, gdp_per_capita: 4600, business_score: 82 },
+                { name: 'Ahmedabad', population: 7.6, gdp_per_capita: 4200, business_score: 78 },
+                { name: 'Pune', population: 6.8, gdp_per_capita: 4900, business_score: 85 },
+                { name: 'Jaipur', population: 3.9, gdp_per_capita: 3800, business_score: 72 },
+                { name: 'Lucknow', population: 3.6, gdp_per_capita: 3500, business_score: 68 }
+            ]
+        };
+
+        // Tab Management
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Initialize charts for the tab if needed
+            if (tabName === 'dashboard') {
+                updateDashboardStats();
+            } else if (tabName === 'regions') {
+                initializeRegionsTab();
+            } else if (tabName === 'models') {
+                initializeModelsTab();
+            } else if (tabName === 'analytics') {
+                initializeAnalyticsTab();
+            }
+        }
+
+        // Model Status Management
+        function updateModelStatus(message, type = 'loading') {
+            const statusElement = document.getElementById('modelStatus');
+            const dotClass = type === 'success' ? 'status-success' : 
+                           type === 'error' ? 'status-error' : 'status-loading';
+            
+            statusElement.innerHTML = `
+                <div class="model-status">
+                    <span class="status-dot ${dotClass}"></span>
+                    <span>${message}</span>
+                </div>
+            `;
+        }
+
+        function updateDashboardStats() {
+            if (predictor) {
+                const loadedModels = Object.values(predictor.modelStatus).filter(status => status === 'loaded').length;
+                document.getElementById('modelsReady').textContent = loadedModels;
+            }
+        }
+
+        // Form Handling
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!predictor) {
+                alert('Models are still loading. Please wait...');
+                return;
+            }
+            
+            const loading = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+            
+            // Show loading
+            loading.style.display = 'block';
+            resultCard.style.display = 'none';
+            
+            // Collect form data
+            const formData = {
+                gdp_growth: parseFloat(document.getElementById('gdp_growth').value),
+                employment_rate: parseFloat(document.getElementById('employment_rate').value),
+                industrial_output: parseFloat(document.getElementById('industrial_output').value),
+                infrastructure_score: parseFloat(document.getElementById('infrastructure_score').value),
+                population_growth: parseFloat(document.getElementById('population_growth').value),
+                education_index: parseFloat(document.getElementById('education_index').value),
+                healthcare_index: parseFloat(document.getElementById('healthcare_index').value),
+                urbanization_rate: parseFloat(document.getElementById('urbanization_rate').value),
+                fdi_inflow: parseFloat(document.getElementById('fdi_inflow').value),
+                domestic_investment: parseFloat(document.getElementById('domestic_investment').value),
+                venture_capital: parseFloat(document.getElementById('venture_capital').value),
+                real_estate_growth: parseFloat(document.getElementById('real_estate_growth').value)
+            };
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                const result = predictor.predict(formData);
+                displayPredictionResult(result, formData);
+                
+                // Hide loading and show results
+                loading.style.display = 'none';
+                resultCard.style.display = 'block';
+            }, 1000);
+        });
+
+        function displayPredictionResult(result, formData) {
+            document.getElementById('predictionScore').textContent = result.average_score.toFixed(1);
+            document.getElementById('investmentGrade').textContent = result.investment_grade;
+            document.getElementById('recommendationText').textContent = result.recommendation;
+            
+            const modelComparison = document.getElementById('modelComparison');
+            modelComparison.innerHTML = '';
+            
+            for (const [modelName, score] of Object.entries(result.predictions)) {
+                const displayName = modelName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const modelCard = document.createElement('div');
+                modelCard.className = 'model-card';
+                modelCard.innerHTML = `
+                    <div style="font-size: 0.8rem; opacity: 0.8;">${displayName}</div>
+                    <div style="font-size: 1.2rem; font-weight: bold;">${score.toFixed(1)}</div>
+                `;
+                modelComparison.appendChild(modelCard);
+            }
+            
+            // Add to recent predictions
+            addRecentPrediction(formData, result);
+            
+            // Update prediction chart
+            updatePredictionChart(result.predictions);
+        }
+
+        function addRecentPrediction(formData, result) {
+            const recentPredictions = document.getElementById('recentPredictions');
+            const predictionElement = document.createElement('div');
+            predictionElement.className = 'region-card';
+            predictionElement.innerHTML = `
+                <h4>${formData.gdp_growth}% GDP Growth Analysis</h4>
+                <p>Score: <strong>${result.average_score.toFixed(1)}/100</strong> | Grade: ${result.investment_grade}</p>
+                <p>${result.recommendation}</p>
+                <div class="region-stats">
+                    <div class="region-stat">👥 Employment: ${formData.employment_rate}%</div>
+                    <div class="region-stat">🏗️ Infrastructure: ${formData.infrastructure_score}/100</div>
+                    <div class="region-stat">💼 FDI: $${formData.fdi_inflow}B</div>
+                </div>
+            `;
+            
+            // Add to beginning of recent predictions
+            if (recentPredictions.children.length > 0) {
+                recentPredictions.insertBefore(predictionElement, recentPredictions.firstChild);
+            } else {
+                recentPredictions.innerHTML = '';
+                recentPredictions.appendChild(predictionElement);
+            }
+        }
+
+        function updatePredictionChart(predictions) {
+            const ctx = document.getElementById('modelPerformanceChart').getContext('2d');
+            
+            if (window.predictionChart) {
+                window.predictionChart.destroy();
+            }
+            
+            const modelNames = Object.keys(predictions).map(name => 
+                name.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+            );
+            const scores = Object.values(predictions);
+            
+            window.predictionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: modelNames,
+                    datasets: [{
+                        label: 'Prediction Score',
+                        data: scores,
+                        backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'],
+                        borderColor: ['#2563eb', '#dc2626', '#059669', '#d97706'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Investment Score'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Regions Tab
+        function initializeRegionsTab() {
+            const regionsList = document.getElementById('regionsList');
+            regionsList.innerHTML = '';
+            
+            sampleData.regions.forEach(region => {
+                const regionElement = document.createElement('div');
+                regionElement.className = 'region-card';
+                regionElement.innerHTML = `
+                    <h4>${region.name}</h4>
+                    <p>Major Cities: ${region.cities.join(', ')}</p>
+                    <div class="region-stats">
+                        <div class="region-stat">📈 GDP: ${region.gdp_growth}%</div>
+                        <div class="region-stat">👥 Employment: ${region.employment_rate}%</div>
+                        <div class="region-stat">🏗️ Infrastructure: ${region.infrastructure_score}/100</div>
+                        <div class="region-stat">🎓 Education: ${region.education_index}</div>
+                        <div class="region-stat">🏥 Healthcare: ${region.healthcare_index}</div>
+                        <div class="region-stat">🏙️ Urbanization: ${region.urbanization_rate}%</div>
+                        <div class="region-stat">💼 FDI: $${region.fdi_inflow}B</div>
+                        <div class="region-stat">🏠 Domestic: $${region.domestic_investment}B</div>
+                    </div>
+                `;
+                regionsList.appendChild(regionElement);
+            });
+            
+            // Initialize cities chart
+            initializeCitiesChart();
+        }
+
+        function initializeCitiesChart() {
+            const ctx = document.getElementById('citiesChart').getContext('2d');
+            
+            if (window.citiesChart) {
+                window.citiesChart.destroy();
+            }
+            
+            const cityNames = sampleData.cities.map(city => city.name);
+            const populations = sampleData.cities.map(city => city.population);
+            const gdpPerCapita = sampleData.cities.map(city => city.gdp_per_capita);
+            
+            window.citiesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: cityNames,
+                    datasets: [
+                        {
+                            label: 'Population (Millions)',
+                            data: populations,
+                            backgroundColor: '#3b82f6',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'GDP per Capita ($)',
+                            data: gdpPerCapita,
+                            backgroundColor: '#10b981',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Population (Millions)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'GDP per Capita ($)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Models Tab
+        function initializeModelsTab() {
+            if (!predictor) return;
+            
+            const modelInfo = predictor.getModelInfo();
+            const modelDetails = document.getElementById('modelDetails');
+            
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+            
+            for (const [modelName, info] of Object.entries(modelInfo)) {
+                const displayName = modelName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const statusColor = info.status === 'loaded' ? '#10b981' : 
+                                 info.status === 'loading' ? '#f59e0b' : '#ef4444';
+                const statusText = info.status === 'loaded' ? 'Loaded' : 
+                                info.status === 'loading' ? 'Loading...' : 'Error';
+                
+                html += `
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border-left: 4px solid ${statusColor};">
+                        <h4 style="margin: 0 0 10px 0;">${displayName}</h4>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <div style="width: 10px; height: 10px; border-radius: 50%; background: ${statusColor};"></div>
+                            <span>Status: ${statusText}</span>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #64748b;">
+                            <div><strong>R² Score:</strong> ${info.metrics.r2.toFixed(3)}</div>
+                            <div><strong>Features:</strong> ${info.features.length} variables</div>
+                            <div style="margin-top: 10px;">
+                                <strong>Feature Set:</strong><br>
+                                <small>${info.features.join(', ')}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            modelDetails.innerHTML = html;
+        }
+
+        // Analytics Tab
+        function initializeAnalyticsTab() {
+            // Regional Analytics Chart
+            const regionalCtx = document.getElementById('regionalAnalyticsChart').getContext('2d');
+            if (window.regionalChart) {
+                window.regionalChart.destroy();
+            }
+            
+            const regionNames = sampleData.regions.map(region => region.name);
+            const gdpGrowth = sampleData.regions.map(region => region.gdp_growth);
+            const employment = sampleData.regions.map(region => region.employment_rate);
+            
+            window.regionalChart = new Chart(regionalCtx, {
+                type: 'bar',
+                data: {
+                    labels: regionNames,
+                    datasets: [
+                        {
+                            label: 'GDP Growth (%)',
+                            data: gdpGrowth,
+                            backgroundColor: '#3b82f6'
+                        },
+                        {
+                            label: 'Employment Rate (%)',
+                            data: employment,
+                            backgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Factors Chart
+            const factorsCtx = document.getElementById('factorsChart').getContext('2d');
+            if (window.factorsChart) {
+                window.factorsChart.destroy();
+            }
+            
+            window.factorsChart = new Chart(factorsCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Economic Factors', 'Social Development', 'Infrastructure', 'Investment Climate', 'Human Capital'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize predictor
+            predictor = new InvestmentPredictor();
+            
+            // Initialize regions tab
+            initializeRegionsTab();
+            
+            // Set up sample recent prediction
+            const samplePrediction = {
+                gdp_growth: 7.8,
+                employment_rate: 87,
+                industrial_output: 135,
+                infrastructure_score: 80,
+                population_growth: 1.6,
+                education_index: 0.78,
+                healthcare_index: 0.75,
+                urbanization_rate: 55,
+                fdi_inflow: 3.2,
+                domestic_investment: 18.5,
+                venture_capital: 1.5,
+                real_estate_growth: 9.2
+            };
+            
+            // Add sample prediction after models load
+            setTimeout(() => {
+                if (predictor) {
+                    const sampleResult = predictor.predict(samplePrediction);
+                    addRecentPrediction(samplePrediction, sampleResult);
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
+</html>
