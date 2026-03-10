@@ -1,0 +1,8 @@
+# Node.js dependencies
+node_modules/
+
+# Frontend build outputs
+frontend/dist/
+
+# Secrets / config files
+frontend/src/config.js
