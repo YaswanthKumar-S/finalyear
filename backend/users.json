@@ -1,0 +1,16 @@
+[
+  {
+    "id": "965a3139-9a8a-429d-a07a-c3feaca60944",
+    "name": "Administrator",
+    "email": "admin@evstation.com",
+    "password": "$2b$12$sfdu1wyXMalNpNqsmFHzH..mVqstpAWcacMw.abj4kp0rWMrlRL1y",
+    "role": "admin"
+  },
+  {
+    "id": "cad6b927-f9b6-41e2-b656-26bc7fd46603",
+    "name": "Test Client",
+    "email": "test@client.com",
+    "password": "$2b$12$9zWUB9rAR1We8.5U3bPaJu0SwAyPB0oTia6xI6ULkXCSZBRbWWNSa",
+    "role": "client"
+  }
+]
